@@ -1,3 +1,11 @@
+//
+//  contacts_json.c
+//  contacts_project
+//
+//  Created by Jimmy L on 03/05/2019.
+//  Copyright © 2019 Jimmy L. All rights reserved.
+//
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -21,31 +29,6 @@ typedef struct ContactData
 }ContactData;
 
 /*
- * Save a Contact
- */
-void SaveContact(FILE *File, json_object *value)
-{
-	File = fopen("contacts.json", "w+");
-
-	/*Json object*/
-  	json_object *jobj = json_object_new_object();
-	json_object_object_add(jobj, "contacts", value);
-
-	fputs(json_object_to_json_string(jobj), File);
-
-	fclose(File);
-}
-
-/*
- * Check id
- */
-int CheckContactId(JsonData *File, int idx)
-{
-	if (json_object_array_get_idx(File->contacts, idx - 1) == NULL) return 0;
-	return 1;
-}
-
-/*
  * fgets functions (remove \n)
  */
 int NewFgets(char *value, int size)
@@ -62,6 +45,15 @@ int NewFgets(char *value, int size)
         return 1;
     }
     else return 0; // error
+}
+
+/*
+ * Check id
+ */
+int CheckContactId(JsonData *File, int idx)
+{
+	if (json_object_array_get_idx(File->contacts, idx - 1) == NULL) return 0;
+	return 1;
 }
 
 /*
@@ -111,6 +103,46 @@ void ShowAll(JsonData *File, ContactData *Contact)
 }
 
 /*
+ * Save a Contact
+ */
+void SaveContact(FILE *File, json_object *value)
+{
+	File = fopen("contacts.json", "w+");
+
+	/*Json object*/
+  	json_object *jobj = json_object_new_object();
+	json_object_object_add(jobj, "contacts", value);
+
+	fputs(json_object_to_json_string(jobj), File);
+
+	fclose(File);
+}
+
+/*
+ * Create a contact (object)
+ * @return: json object
+ */
+json_object *CreateObject(const char *name, int *age, const char *address, const char *tel)
+{
+	/*Json object*/
+	json_object *jobj = json_object_new_object();
+
+	/*Json data*/
+	json_object *jname = json_object_new_string(name);
+	json_object *jage = json_object_new_int(*age);
+	json_object *jaddress = json_object_new_string(address);
+	json_object *jtel = json_object_new_string(tel);
+
+	/*Add Data in Object */
+	json_object_object_add(jobj, "name", jname);
+	json_object_object_add(jobj, "age", jage);
+	json_object_object_add(jobj, "address", jaddress);
+	json_object_object_add(jobj, "tel", jtel);
+
+	return jobj;
+}
+
+/*
  * Edit a Contact
  */
 void EditContact(JsonData *File, int idx)
@@ -132,19 +164,7 @@ void EditContact(JsonData *File, int idx)
 		scanf("%s", tel);
 
 		/*Json object*/
-		json_object *jobj = json_object_new_object();
-
-		/*Json data*/
-		json_object *jname = json_object_new_string(name);
-		json_object *jage = json_object_new_int(age);
-		json_object *jaddress = json_object_new_string(address);
-		json_object *jtel = json_object_new_string(tel);
-
-		/*Add Data in Object */
-		json_object_object_add(jobj, "name", jname);
-		json_object_object_add(jobj, "age", jage);
-		json_object_object_add(jobj, "address", jaddress);
-		json_object_object_add(jobj, "tel", jtel);
+		json_object *jobj = CreateObject(name, &age, address, tel);
 
 		json_object_array_put_idx(File->contacts, idx - 1, jobj);
 
@@ -165,19 +185,7 @@ void CreateNewContact(JsonData *File, const char* name, int age, const char* add
 	if (CheckContactNameValue == -1)
 	{
 		/*Json object*/
-		json_object *jobj = json_object_new_object();
-
-		/*Json data*/
-		json_object *jname = json_object_new_string(name);
-		json_object *jage = json_object_new_int(age);
-		json_object *jaddress = json_object_new_string(address);
-		json_object *jtel = json_object_new_string(tel);
-
-		/*Add Data in Object */
-		json_object_object_add(jobj, "name", jname);
-		json_object_object_add(jobj, "age", jage);
-		json_object_object_add(jobj, "address", jaddress);
-		json_object_object_add(jobj, "tel", jtel);
+		json_object *jobj = CreateObject(name, &age, address, tel);
 
 		/*Add Object in Array */
 		json_object_array_add(File->contacts, jobj);
